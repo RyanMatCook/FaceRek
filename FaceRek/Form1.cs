@@ -34,19 +34,12 @@ namespace FaceRek
 			try
 			{
 				_cameraCapture = new VideoCapture();
-				//_cameraCapture.Width = 600;
-				//_cameraCapture.set(CV_CAP_PROP_FRAME_HEIGHT, 480);
-				//_cameraCapture.set(CV_CAP_PROP_FOURCC, CV_FOURCC('B', 'G', 'R', '3'));
 			}
 			catch (Exception e)
 			{
 				MessageBox.Show(e.Message);
 				return;
 			}
-
-			//_fgDetector = new BackgroundSubtractorMOG2();
-			//_blobDetector = new CvBlobDetector();
-			//_tracker = new CvTracks();
 
 			Application.Idle += ProcessFrame;
 		}
@@ -62,32 +55,21 @@ namespace FaceRek
 			detectionTime++;
 
 			foreach (Rectangle face in faces)
-				CvInvoke.Rectangle(frame, face, new Bgr(Color.Red).MCvScalar, 2);
+				CvInvoke.Rectangle(frame, face, new Bgr(Color.Yellow).MCvScalar, 1);
 			foreach (Rectangle eye in eyes)
-				CvInvoke.Rectangle(frame, eye, new Bgr(Color.Blue).MCvScalar, 2);
-			//Mat smoothedFrame = new Mat();
-			//CvInvoke.GaussianBlur(frame, smoothedFrame, new Size(3, 3), 1); //filter out noises
-			////frame._SmoothGaussian(3); 
+				CvInvoke.Rectangle(frame, eye, new Bgr(Color.Green).MCvScalar, 1);
+			
+			imbxCurrentFrame.Image = frame;
+		}
 
-			//#region use the BG/FG detector to find the forground mask
-			//Mat forgroundMask = new Mat();
-			//_fgDetector.Apply(smoothedFrame, forgroundMask);
-			//#endregion
+		private void btnToggleCamera_Click(object sender, EventArgs e)
+		{
 
-			//CvBlobs blobs = new CvBlobs();
-			//_blobDetector.Detect(forgroundMask.ToImage<Gray, byte>(), blobs);
-			//blobs.FilterByArea(100, int.MaxValue);
+		}
 
-			//float scale = (frame.Width + frame.Width) / 2.0f;
-			//_tracker.Update(blobs, 0.01 * scale, 5, 5);
+		private void btnLockFrame_Click(object sender, EventArgs e)
+		{
 
-			//foreach (var pair in _tracker)
-			//{
-			//	CvTrack b = pair.Value;
-			//	CvInvoke.Rectangle(frame, b.BoundingBox, new MCvScalar(255.0, 255.0, 255.0), 2);
-			//	CvInvoke.PutText(frame, b.Id.ToString(), new Point((int)Math.Round(b.Centroid.X), (int)Math.Round(b.Centroid.Y)), FontFace.HersheyPlain, 1.0, new MCvScalar(255.0, 255.0, 255.0));
-			//}
-			imbxCurrentFrame.Image = frame.ToImage<>();
 		}
 	}
 }
