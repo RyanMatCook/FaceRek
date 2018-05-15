@@ -46,6 +46,7 @@
 			this.stbNotifications = new System.Windows.Forms.ToolStripStatusLabel();
 			this.cbWithinX = new System.Windows.Forms.CheckBox();
 			this.cbWithinY = new System.Windows.Forms.CheckBox();
+			this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
 			((System.ComponentModel.ISupportInitialize)(this.imbxCurrentFrame)).BeginInit();
 			this.statusStrip1.SuspendLayout();
 			this.SuspendLayout();
@@ -187,6 +188,11 @@
 			this.cbWithinY.Text = "Within Y";
 			this.cbWithinY.UseVisualStyleBackColor = true;
 			// 
+			// notifyIcon1
+			// 
+			this.notifyIcon1.Text = "notifyIcon1";
+			this.notifyIcon1.Visible = true;
+			// 
 			// Main
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -236,6 +242,7 @@
 		private System.Windows.Forms.ToolStripStatusLabel stbNotifications;
 		private System.Windows.Forms.CheckBox cbWithinX;
 		private System.Windows.Forms.CheckBox cbWithinY;
+		private System.Windows.Forms.NotifyIcon notifyIcon1;
 	}
 }
 

@@ -16,10 +16,9 @@ namespace FaceRek
 {
 	public static class DetectFace
 	{
-		public static void Detect(IInputArray image, List<Rectangle> faces, out long detectionTime)
+		public static void Detect(IInputArray image, List<Rectangle> faces)
 		{
-			Stopwatch watch;
-			string faceFileName = @"./Resources/haarcascade_frontalface_default.xml", eyeFileName = @"./Resources/haarcascade_eye.xml";
+			string faceFileName = @"./Resources/haarcascade_frontalface_default.xml";
 
 			using (InputArray iaImage = image.GetInputArray())
 			{
@@ -32,7 +31,6 @@ namespace FaceRek
 						face.ScaleFactor = 1.1;
 						face.MinNeighbors = 10;
 						face.MinObjectSize = Size.Empty;
-						watch = Stopwatch.StartNew();
 						using (CudaImage<Bgr, Byte> gpuImage = new CudaImage<Bgr, byte>(image))
 						using (CudaImage<Gray, Byte> gpuGray = gpuImage.Convert<Gray, Byte>())
 						using (GpuMat region = new GpuMat())
@@ -41,7 +39,6 @@ namespace FaceRek
 							Rectangle[] faceRegion = face.Convert(region);
 							faces.AddRange(faceRegion);
 						}
-						watch.Stop();
 					}
 				}
 				else
@@ -50,8 +47,6 @@ namespace FaceRek
 					//Read the HaarCascade objects
 					using (CascadeClassifier face = new CascadeClassifier(faceFileName))
 					{
-						watch = Stopwatch.StartNew();
-
 						using (UMat ugray = new UMat())
 						{
 							CvInvoke.CvtColor(image, ugray, Emgu.CV.CvEnum.ColorConversion.Bgr2Gray);
@@ -70,10 +65,8 @@ namespace FaceRek
 
 							faces.AddRange(facesDetected);
 						}
-						watch.Stop();
 					}
 				}
-				detectionTime = watch.ElapsedMilliseconds;
 			}
 		}
 	}

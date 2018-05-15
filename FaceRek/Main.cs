@@ -79,70 +79,56 @@ namespace FaceRek
 			Mat frame = _cameraCapture.QueryFrame();
 
 			List<Rectangle> faces = new List<Rectangle>();
-			List<Rectangle> eyes = new List<Rectangle>();
-			DetectFace.Detect(frame, faces, out var detectionTime);
-			detectionTime++;
+			DetectFace.Detect(frame, faces);
 
 			foreach (Rectangle face in faces)
 				CvInvoke.Rectangle(frame, face, new Bgr(Color.Orange).MCvScalar, 1);
 
-			if (CameraActive)
-				imbxCurrentFrame.Image = frame;
-			else
-				imbxCurrentFrame.Image = null;
-
+			var lockFrameColour = Color.DarkMagenta;
 			if (faces.Count > 1)
 			{
 				stbNotifications.ForeColor = Color.Orange;
 				stbNotifications.Text = "More than 1 face detected.";
-
-				if (FrameIsLocked)
-				{
-					CvInvoke.Rectangle(frame, LockedFrame, new Bgr(Color.Orange).MCvScalar, 2);
-				}
-				return;
 			}
 			else if (faces.Count == 0 && MonitoringActive)
 			{
 				stbNotifications.ForeColor = Color.Orange;
 				stbNotifications.Text = "Warning! No face detected.";
+			}
+			else if (faces.Count == 1)
+			{
+				var detectedFace = faces[0];
+				// 1 Face detected
+				txtFaceXCurrent.Text = detectedFace.Location.X.ToString();
+				txtFaceYCurrent.Text = detectedFace.Location.Y.ToString();
 
-				if (FrameIsLocked)
+				var withinXThreshold = LockedFrame.Left <= detectedFace.Left + ThresholdX && LockedFrame.Right >= detectedFace.Right - ThresholdX;
+				var withinYThreshold = LockedFrame.Top >= detectedFace.Top - ThresholdY && LockedFrame.Bottom <= detectedFace.Bottom + ThresholdY;
+
+				cbWithinX.Checked = withinXThreshold;
+				cbWithinY.Checked = withinYThreshold;
+
+				if (MonitoringActive && !(withinYThreshold || withinXThreshold))
 				{
-					CvInvoke.Rectangle(frame, LockedFrame, new Bgr(Color.Orange).MCvScalar, 2);
+					lockFrameColour = Color.Red;
+					stbNotifications.ForeColor = Color.Red;
+					stbNotifications.Text = "Mind your posture!";
 				}
-				return;
-			}
-			else if (faces.Count == 0)
-			{
-				if (FrameIsLocked)
+				else if (MonitoringActive && withinXThreshold && withinYThreshold)
 				{
-					CvInvoke.Rectangle(frame, LockedFrame, new Bgr(Color.Orange).MCvScalar, 2);
+					lockFrameColour = Color.Green;
 				}
-				return;
 			}
 
-			var detectedFace = faces[0];
-			// 1 Face detected
-			txtFaceXCurrent.Text = detectedFace.Location.X.ToString();
-			txtFaceYCurrent.Text = detectedFace.Location.Y.ToString();
-
-			var withinXThreshold = LockedFrame.Left <= detectedFace.Left + ThresholdX && LockedFrame.Right >= detectedFace.Right - ThresholdX;
-			var withinYThreshold = LockedFrame.Top >= detectedFace.Top - ThresholdY && LockedFrame.Bottom <= detectedFace.Bottom + ThresholdY;
-
-			cbWithinX.Checked = withinXThreshold;
-			cbWithinY.Checked = withinYThreshold;
-
-			if (MonitoringActive && !(withinYThreshold || withinXThreshold))
+			if (FrameIsLocked)
 			{
-				CvInvoke.Rectangle(frame, LockedFrame, new Bgr(Color.Red).MCvScalar, 2);
-				stbNotifications.ForeColor = Color.Red;
-				stbNotifications.Text = "Mind your posture!";
+				CvInvoke.Rectangle(frame, LockedFrame, new Bgr(lockFrameColour).MCvScalar, 2);
 			}
-			else if (MonitoringActive && withinXThreshold && withinYThreshold)
-			{
-				CvInvoke.Rectangle(frame, LockedFrame, new Bgr(Color.Green).MCvScalar, 2);
-			}
+
+			if (CameraActive)
+				imbxCurrentFrame.Image = frame;
+			else
+				imbxCurrentFrame.Image = null;
 		}
 
 		private void btnToggleCamera_Click(object sender, EventArgs e)
@@ -153,7 +139,11 @@ namespace FaceRek
 		private void btnToggleMonitoring_Click(object sender, EventArgs e)
 		{
 			if (FrameIsLocked)
+			{
 				MonitoringActive = !MonitoringActive;
+				if(MonitoringActive)
+					notifyIcon1.ShowBalloonTip(1000, "title", "text", ToolTipIcon.Info);
+			}
 			else
 			{
 				stbNotifications.ForeColor = Color.Orange;
@@ -165,25 +155,24 @@ namespace FaceRek
 		{
 			Mat frame = _cameraCapture.QueryFrame();
 			List<Rectangle> faces = new List<Rectangle>();
-
-			DetectFace.Detect(frame, faces, out var detectionTime);
+			DetectFace.Detect(frame, faces);
 
 			if (faces.Count > 1)
 			{
 				stbNotifications.ForeColor = Color.Orange;
 				stbNotifications.Text = "More than one face was detected. This program is intended for one face only.";
-				return;
 			}
 			else if (faces.Count == 0)
 			{
 				stbNotifications.ForeColor = Color.Orange;
 				stbNotifications.Text = "No face detected. Maybe give it a wash?";
-				return;
 			}
-
-			LockedFrame = faces[0];
-			txtFaceXLocked.Text = LockedFrame.Location.X.ToString();
-			txtFaceYLocked.Text = LockedFrame.Location.Y.ToString();
+			else
+			{
+				LockedFrame = faces[0];
+				txtFaceXLocked.Text = LockedFrame.Location.X.ToString();
+				txtFaceYLocked.Text = LockedFrame.Location.Y.ToString();
+			}
 		}
 	}
 }
