@@ -43,6 +43,10 @@ namespace FaceRek
 		public bool FrameIsLocked { get => _frameIsLocked; set => _frameIsLocked = value; }
 		private bool _frameIsLocked;
 
+		public DateTime LastPostureWarning;
+
+		public int PostureWarningThresholdInSeconds = 5;
+
 		int ThresholdX = 25, ThresholdY = 35;
 
 		private static VideoCapture _cameraCapture;
@@ -87,12 +91,12 @@ namespace FaceRek
 			var lockFrameColour = Color.DarkMagenta;
 			if (faces.Count > 1)
 			{
-				stbNotifications.ForeColor = Color.Orange;
+				stbNotifications.ForeColor = Color.DarkOrange;
 				stbNotifications.Text = "More than 1 face detected.";
 			}
 			else if (faces.Count == 0 && MonitoringActive)
 			{
-				stbNotifications.ForeColor = Color.Orange;
+				stbNotifications.ForeColor = Color.DarkOrange;
 				stbNotifications.Text = "Warning! No face detected.";
 			}
 			else if (faces.Count == 1)
@@ -108,11 +112,18 @@ namespace FaceRek
 				cbWithinX.Checked = withinXThreshold;
 				cbWithinY.Checked = withinYThreshold;
 
-				if (MonitoringActive && !(withinYThreshold || withinXThreshold))
+				if (MonitoringActive && (!withinYThreshold || !withinXThreshold))
 				{
 					lockFrameColour = Color.Red;
 					stbNotifications.ForeColor = Color.Red;
 					stbNotifications.Text = "Mind your posture!";
+					if((DateTime.Now - LastPostureWarning).TotalSeconds >= PostureWarningThresholdInSeconds)
+					{
+						LastPostureWarning = DateTime.Now;
+						notifyIcon1.BalloonTipTitle = "Posture Warning!";
+						notifyIcon1.BalloonTipText = "Hey there, seems you're slouching! Time to sit up straight...";
+						notifyIcon1.ShowBalloonTip(4000);
+					}
 				}
 				else if (MonitoringActive && withinXThreshold && withinYThreshold)
 				{
@@ -141,12 +152,15 @@ namespace FaceRek
 			if (FrameIsLocked)
 			{
 				MonitoringActive = !MonitoringActive;
-				if(MonitoringActive)
-					notifyIcon1.ShowBalloonTip(1000, "title", "text", ToolTipIcon.Info);
+				if (MonitoringActive)
+				{
+					notifyIcon1.BalloonTipText = "Monitoring has started. Your posture is now under intense scrutiny!";
+					notifyIcon1.ShowBalloonTip(4000);
+				}
 			}
 			else
 			{
-				stbNotifications.ForeColor = Color.Orange;
+				stbNotifications.ForeColor = Color.DarkOrange;
 				stbNotifications.Text = "Please use the \"Lock Frame\" button ";
 			}
 		}
@@ -159,12 +173,12 @@ namespace FaceRek
 
 			if (faces.Count > 1)
 			{
-				stbNotifications.ForeColor = Color.Orange;
+				stbNotifications.ForeColor = Color.DarkOrange;
 				stbNotifications.Text = "More than one face was detected. This program is intended for one face only.";
 			}
 			else if (faces.Count == 0)
 			{
-				stbNotifications.ForeColor = Color.Orange;
+				stbNotifications.ForeColor = Color.DarkOrange;
 				stbNotifications.Text = "No face detected. Maybe give it a wash?";
 			}
 			else
