@@ -154,6 +154,7 @@ namespace FaceRek
 				MonitoringActive = !MonitoringActive;
 				if (MonitoringActive)
 				{
+					notifyIcon1.BalloonTipTitle = "Posture Monitoring Commenced!";
 					notifyIcon1.BalloonTipText = "Monitoring has started. Your posture is now under intense scrutiny!";
 					notifyIcon1.ShowBalloonTip(4000);
 				}
